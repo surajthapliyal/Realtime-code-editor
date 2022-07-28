@@ -1,5 +1,6 @@
 const express = require("express")
 const app = express();
+const cors = require("cors")
 const http = require("http");
 const path = require("path");
 const { Server } = require("socket.io")
@@ -8,8 +9,10 @@ const io = new Server(server)
 const ACTIONS = require("./src/Actions")
 
 app.use(express.static("build"));
+app.use(express.urlencoded({ extended: true }))
+// app.use(cors);
 
-//global middleware
+//global middleware (for any request in server we will serve this route first, this contains static build)
 app.use((req, res, next) => {
     res.sendFile(path.join(__dirname, "build", "index.html"))
 })
@@ -47,6 +50,7 @@ io.on("connection", (socket) => {
 
     //when any socket changes the code, then other should have that reflected in their editor
     socket.on(ACTIONS.CODE_CHANGE, ({ roomId, code }) => {
+        //console.log(code);
         //emitting the same event from the server to all the clients connected to this particular room instead itself (socket which is emitting this event)
         socket.in(roomId).emit(ACTIONS.CODE_CHANGE, { code })
     })
@@ -73,5 +77,7 @@ io.on("connection", (socket) => {
     })
 })
 
+
 const PORT = process.env.PORT || 5000
 server.listen(PORT, () => console.log(`Server listening on PORT ${PORT}`))
+

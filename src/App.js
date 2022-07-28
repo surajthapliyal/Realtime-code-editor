@@ -9,7 +9,7 @@ const App = () => {
   return (
     <>
       <div className="">
-        <Toaster position="top-right" theme={{ success: { primary: "#4aed88" } }}></Toaster>
+        <Toaster position="top-right" theme={{ success: { primary: "#5e548e" } }}></Toaster>
       </div>
       <Router>
         <Routes>
