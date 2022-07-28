@@ -162,23 +162,23 @@ const EditorPage = () => {
         }
 
         const data = { code, lang, input };
-
-
-        axios.post(`${process.env.REACT_APP_BACKEND_URL}/code/submit`, data)
-            .then(res => {
-                console.log(res.data)
-                const data = res.data
-                if (data.err) {
-                    // Error in user code
-                    setOutput(data.error)
-                } else {
-                    setOutput(data.output)
-                }
-
-            })
-            .catch(err => console.log(err))
-
+        
         //hitting post request to compile the code and saving output to output hook
+
+        // axios.post(`${process.env.REACT_APP_BACKEND_URL}/code/submit`, data)
+        //     .then(res => {
+        //         console.log(res.data)
+        //         const data = res.data
+        //         if (data.err) {
+        //             // Error in user code
+        //             setOutput(data.error)
+        //         } else {
+        //             setOutput(data.output)
+        //         }
+
+        //     })
+        //     .catch(err => console.log(err))
+
 
 
 
