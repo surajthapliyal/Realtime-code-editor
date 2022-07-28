@@ -1,5 +1,13 @@
-class test{
-  public static void main(String[] args){
-    System.out.println("Heyy");
-  }
+import java.util.*;
+class test {
+	public static void main(String[] args){
+    	Scanner sc = new Scanner(System.in);
+      	int n = sc.nextInt();
+      	int a[] = new int[n];
+      	for(int i=0;i<n;i++){
+          	a[i] = sc.nextInt();
+        }
+      	Arrays.sort(a);
+      	System.out.println("Sorted = " + Arrays.toString(a));
+  	}
 }
