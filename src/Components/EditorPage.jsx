@@ -28,9 +28,10 @@ const EditorPage = () => {
     const params = useParams();
     const roomId = params.roomId;
     const [clients, setClients] = useState([]);
-    const [input, setInput] = useState("")
-    const [output, setOutput] = useState("")
+    const [input, setInput] = useState("input goes here...")
+    const [output, setOutput] = useState("output goes here...")
     const [lang, setLang] = useState("c");
+    const [loading, setLoading] = useState(false)
     const [config, setConfig] = useState({
         mode: { name: "javascript", json: true },
         theme: "dracula",
@@ -130,9 +131,18 @@ const EditorPage = () => {
                     editorRef.current.setValue(code)
                 }
             })
+            socketRef.current.on(ACTIONS.CHANGE_INPUT, (data) => {
+                setInput(data);
+            })
+
+            socketRef.current.on(ACTIONS.CHANGE_OUTPUT, (data) => {
+                setOutput(data);
+            })
         }
         return () => {
             socketRef.current.off(ACTIONS.CODE_CHANGE);
+            socketRef.current.off(ACTIONS.CHANGE_INPUT);
+            socketRef.current.off(ACTIONS.CHANGE_OUTPUT);
         }
 
     }, [socketRef.current])
@@ -156,31 +166,33 @@ const EditorPage = () => {
     const handleCodeSubmit = (e) => {
         e.preventDefault();
         const code = codeRef.current
-        console.log({ code, lang, input })
+        console.log("from frontend", { code, lang, input })
         if (!code || !lang) {
             return;
         }
-
+        setLoading((prev) => !prev);
+        setOutput("running...");
+        socketRef.current.emit(ACTIONS.CHANGE_OUTPUT, { roomId, data: "running..." });
         const data = { code, lang, input };
-        
+
         //hitting post request to compile the code and saving output to output hook
 
-        // axios.post(`${process.env.REACT_APP_BACKEND_URL}/code/submit`, data)
-        //     .then(res => {
-        //         console.log(res.data)
-        //         const data = res.data
-        //         if (data.err) {
-        //             // Error in user code
-        //             setOutput(data.error)
-        //         } else {
-        //             setOutput(data.output)
-        //         }
+        axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/code/submit`, data)
+            .then(res => {
+                console.log(res.data)
+                const data = res.data
+                if (data.err) {
+                    // Error in user code
+                    setOutput(data.error)
+                    socketRef.current.emit(ACTIONS.CHANGE_OUTPUT, { roomId, data: data.error });
+                } else {
+                    setOutput(data.output)
+                    socketRef.current.emit(ACTIONS.CHANGE_OUTPUT, { roomId, data: data.output });
+                }
+            })
+            .catch(err => console.log(err))
 
-        //     })
-        //     .catch(err => console.log(err))
-
-
-
+        setLoading((prev) => !prev);
 
     }
 
@@ -211,7 +223,6 @@ const EditorPage = () => {
                 </select>
                 <select name="modeSelect" className="btn modeSelect" onChange={(e) => setLang(e.target.value)}>
                     <option value="c">C</option>
-                    <option value="cpp">Cpp</option>
                     <option value="java">Java</option>
                     <option value="python">Python</option>
                 </select>
@@ -222,11 +233,12 @@ const EditorPage = () => {
                 <textarea id="realtimeEditor"></textarea>
             </div>
             <div className="ioBox" style={{ display: "flex", width: "100%", flexDirection: "column" }}>
-                <textarea name="" id="" placeholder="input goes here..." style={{ width: "100%", height: "50%", outline: "none" }} value={input} onChange={(e) => {
+                <textarea name="" id="" style={{ width: "100%", height: "50%", outline: "none", fontSize: "20px" }} value={input} onChange={(e) => {
                     setInput(e.target.value)
+                    socketRef.current.emit(ACTIONS.CHANGE_INPUT, { roomId, data: e.target.value });
                 }}>{input}</textarea>
-                <button className="btn" style={{ padding: "5px", fontSize: "15px" }} onClick={handleCodeSubmit}>RUN</button>
-                <textarea name="" id="" placeholder="output goes here..." style={{ width: "100%", height: "50%", outline: "none" }} value={output} onChange={(e) => setOutput(e.target.value)} disabled={true}>{output}</textarea>
+                <button className="btn" style={{ padding: "5px", fontSize: "15px" }} onClick={handleCodeSubmit} disabled={loading}>RUN</button>
+                <textarea name="" id="" style={{ width: "100%", height: "50%", outline: "none", color: "black", fontWeight: "bold", fontSize: "20px" }} value={output} onChange={(e) => setOutput(e.target.value)} disabled={true}>{output}</textarea>
             </div>
         </div >
     )

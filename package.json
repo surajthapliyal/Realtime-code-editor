@@ -2,14 +2,15 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "engines":{
-    "node":"16.0.0"
+  "engines": {
+    "node": "16.0.0"
   },
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.3",
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^0.27.2",
+    "body-parser": "^1.20.0",
     "codemirror": "^5.65.2",
     "cors": "^2.8.5",
     "express": "^4.17.3",
@@ -28,12 +29,12 @@
   },
   "scripts": {
     "start:front": "react-scripts start",
-    "start": "npm run build && npm run server:prod",
+    "start": "npm run build && npm run ./Server_Files/server:prod",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "server:dev": "nodemon server.js",
-    "server:prod": "node server.js"
+    "server:dev": "nodemon ./Server_Files/server.js",
+    "server:prod": "node ./Server_Files/server.js"
   },
   "eslintConfig": {
     "extends": [

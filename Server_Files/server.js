@@ -2,17 +2,22 @@ const express = require("express")
 const app = express();
 const cors = require("cors")
 const http = require("http");
+const bodyParser = require("body-parser")
 const path = require("path");
 const { Server } = require("socket.io")
 const server = http.createServer(app);
 const io = new Server(server)
-const ACTIONS = require("./src/Actions")
+const ACTIONS = require("../src/Actions")
+const code = require("./api/code/code")
 
 app.use(express.static("build"));
-app.use(express.urlencoded({ extended: true }))
-// app.use(cors);
+app.use(cors());
+app.use(bodyParser.json({ limit: '50mb' }))
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }))
+app.use("/api/code", code);
 
 //global middleware (for any request in server we will serve this route first, this contains static build)
+
 app.use((req, res, next) => {
     res.sendFile(path.join(__dirname, "build", "index.html"))
 })
@@ -55,6 +60,13 @@ io.on("connection", (socket) => {
         socket.in(roomId).emit(ACTIONS.CODE_CHANGE, { code })
     })
 
+    socket.on(ACTIONS.CHANGE_INPUT, ({ roomId, data }) => {
+        socket.in(roomId).emit(ACTIONS.CHANGE_INPUT, data)
+    })
+
+    socket.on(ACTIONS.CHANGE_OUTPUT, ({ roomId, data }) => {
+        socket.in(roomId).emit(ACTIONS.CHANGE_OUTPUT, data)
+    })
 
     //existing code sync to the socket which get connected to any room
     socket.on(ACTIONS.SYNC_CODE, ({ code, socketId }) => {
