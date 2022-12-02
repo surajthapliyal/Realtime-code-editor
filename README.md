@@ -56,3 +56,5 @@ Java code:
 
 Errored code:
 ![](./Assets/error_code.png)
+
+_Socket.IO cheatsheet link_ : ![here](https://stackoverflow.com/questions/32674391/io-emit-vs-socket-emit)
